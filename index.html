@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neon Stopwatch with Lap</title>
+  <style>
+    :root {
+      --primary: #7f5af0;
+      --accent: #2cb67d;
+      --background: #16161a;
+      --text: #fffffe;
+      --glass: rgba(255, 255, 255, 0.05);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica Neue', sans-serif;
+      background: radial-gradient(circle at center, #1a1a2e, #0f0f1f);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .stopwatch {
+      width: 320px;
+      padding: 30px;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(127, 90, 240, 0.3);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s;
+    }
+
+    .stopwatch:hover {
+      transform: scale(1.02);
+    }
+
+    #time-display {
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--primary);
+      text-shadow: 0 0 10px var(--primary);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 8px 14px;
+      font-size: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: var(--primary);
+      color: var(--text);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    #word-display {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--accent);
+      text-shadow: 0 0 10px var(--accent);
+      margin-bottom: 10px;
+    }
+
+    #laps {
+      margin-top: 20px;
+      text-align: left;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .lap {
+      font-size: 14px;
+      color: var(--text);
+      padding: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="stopwatch">
+    <div id="time-display">00:00:00</div>
+    <div class="controls">
+      <button onclick="startStopwatch()">Start</button>
+      <button onclick="stopStopwatch()">Stop</button>
+      <button onclick="resetStopwatch()">Reset</button>
+      <button onclick="recordLap()">Lap</button>
+    </div>
+    <div id="word-display">Focus</div>
+    <div id="laps"></div>
+  </div>
+
+  <script>
+    let startTime;
+    let difference = 0;
+    let timerInterval;
+    let running = false;
+    let lapCount = 0;
+
+    const display = document.getElementById("time-display");
+    const wordDisplay = document.getElementById("word-display");
+    const lapsContainer = document.getElementById("laps");
+    const words = ["Focus", "Breathe", "Move", "Rest", "Create", "Learn"];
+
+    function updateDisplay() {
+      difference = Date.now() - startTime;
+
+      let hours = Math.floor(difference / 3600000);
+      let minutes = Math.floor((difference % 3600000) / 60000);
+      let seconds = Math.floor((difference % 60000) / 1000);
+
+      display.textContent =
+        (hours < 10 ? "0" + hours : hours) + ":" +
+        (minutes < 10 ? "0" + minutes : minutes) + ":" +
+        (seconds < 10 ? "0" + seconds : seconds);
+    }
+
+    function startStopwatch() {
+      if (!running) {
+        running = true;
+        startTime = Date.now() - (difference || 0);
+        timerInterval = setInterval(() => {
+          updateDisplay();
+          wordDisplay.textContent = words[Math.floor(Math.random() * words.length)];
+        }, 1000);
+      }
+    }
+
+    function stopStopwatch() {
+      if (running) {
+        running = false;
+        clearInterval(timerInterval);
+      }
+    }
+
+    function resetStopwatch() {
+      running = false;
+      clearInterval(timerInterval);
+      difference = 0;
+      lapCount = 0;
+      display.textContent = "00:00:00";
+      wordDisplay.textContent = "Focus";
+      lapsContainer.innerHTML = "";
+    }
+
+    function recordLap() {
+      if (!running) return;
+      lapCount++;
+      const lapTime = display.textContent;
+      const lapElement = document.createElement("div");
+      lapElement.classList.add("lap");
+      lapElement.textContent = `Lap ${lapCount}: ${lapTime}`;
+      lapsContainer.prepend(lapElement); // latest lap at the top
+    }
+  </script>
+</body>
+</html>
